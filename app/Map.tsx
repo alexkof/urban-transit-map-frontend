@@ -1,17 +1,49 @@
 'use client';
 
-import {MapContainer, Marker, Popup, TileLayer} from 'react-leaflet';
+import {MapContainer, Marker, Polyline, Popup, TileLayer} from 'react-leaflet';
 import 'leaflet/dist/leaflet.css';
 import {CRS, LatLngExpression} from "leaflet";
+import {useEffect, useState} from "react";
+import {parseGeoJSONRoutes} from "@/app/convertor";
 
 const ekb = [56.838011, 60.597474] as LatLngExpression;
 
-//https://tiles.api-maps.yandex.ru/v1/tiles/?x=9902&y=5137&z=14&lang=ru_RU&l=map&apikey=YOUR_API_KEY
-//ttps://core-renderer-tiles.maps.yandex.net/vmap2/tiles?lang=ru_RU&x=344&y=154&z=9&zmin=10&zmax=10&v=25.03.22-0~b:250311142430~ib:250225143608-23954&ads=enabled&client_id=yandex-web-maps&experimental_ranking_mode_name=default-web-ranking&auction=1&experimental_enable_direct_info_logging=1&use_permalinks_for_direct_requests=1&margin=30&experimental_data_hd=vegetation_model_exp
+function getRandomColor() {
+	var letters = '0123456789ABCDEF';
+	var color = '#';
+	for (var i = 0; i < 6; i++) {
+		color += letters[Math.floor(Math.random() * 16)];
+	}
+	return color;
+}
 
-const Map = () => (
-	<MapContainer center={ekb} zoom={13} style={{height: "100vh", width: "100%"}}
-								crs={CRS.EPSG3395}>
+async function loadGeoJSON(url: string) {
+	const response = await fetch(url);
+	const geoJsonData = await response.json();
+	return parseGeoJSONRoutes(geoJsonData);
+}
+
+const Map = () => {
+
+	const [routes, setRoutes] = useState<LatLngExpression[][]>([])
+	useEffect(() => {
+		const f = async () => {
+			const geoJSON = await loadGeoJSON("/test_routes.geo.json");
+			const arr = [] as LatLngExpression[][]
+			geoJSON.map(t => {
+				arr.push(t.points)
+			})
+			setRoutes(arr)
+		}
+		f()
+	}, []);
+
+	useEffect(() => {
+		console.log(routes);
+	}, [routes]);
+
+	return <MapContainer center={ekb} zoom={13} style={{height: "100vh", width: "100%"}}
+											 crs={CRS.EPSG3395}>
 		<TileLayer
 			url='https://core-renderer-tiles.maps.yandex.net/tiles?l=map&x={x}&y={y}&z={z}&scale=1&lang=ru_RU'
 			subdomains={['01', '02', '03', '04']}
@@ -19,12 +51,15 @@ const Map = () => (
 			// onAdd={() => handleTileClick_addYandex()}
 			// onRemove={() => handleTileClick_removeYandex()}
 		/>
+		{routes.map((t, i) =>
+			<Polyline key={i} pathOptions={{color: getRandomColor(), weight: 4}} positions={t}/>
+		)}
 		<Marker position={[56.838011, 60.597474]}>
 			<Popup>
 				Это центр ЕКБ
 			</Popup>
 		</Marker>
 	</MapContainer>
-);
+};
 
 export default Map;
