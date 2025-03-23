@@ -27,6 +27,7 @@ const Map = () => {
 
     const [routes, setRoutes] = useState<LatLngExpression[][]>([])
     const [routesInfo, setRoutesInfo] = useState<{ number: string, points: LatLngExpression[] }[]>([])
+    const [allRoutes, setAllRoutes] = useState<LatLngExpression[][]>([])
 
     useEffect(() => {
         const f = async () => {
@@ -36,6 +37,7 @@ const Map = () => {
                 arr.push(t.points)
             })
             setRoutes(arr)
+            setAllRoutes(arr)
             setRoutesInfo(geoJSON.map(t => {
                 return ({number: t.name, points: t.points});
             }))
@@ -65,6 +67,9 @@ const Map = () => {
                         Маршрут {route.number}
                     </button>
                 ))}
+                <button key={routesInfo.length} style={{display: "block", margin: "5px 0"}}
+                        onClick={() => setRoutes(allRoutes)}>Все маршруты
+                </button>
             </div>
             <MapContainer center={ekb} zoom={13} style={{height: "100vh", width: "100%"}}
                           crs={CRS.EPSG3395}>
