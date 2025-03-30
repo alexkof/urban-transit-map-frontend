@@ -3,7 +3,7 @@
 
 import dynamic from 'next/dynamic';
 
-const MapContainer = dynamic(() => import('./Map'), {
+const MapContainer = dynamic(() => import('@/widgets/map/MapWidget'), {
 	ssr: false
 });
 
