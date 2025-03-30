@@ -20,6 +20,11 @@ features/
  geo-display/            # Отображение геоданных
    map-utils.ts          # Утилиты для работы с картой
    MapView.tsx           # Компонент карты (Client)
+  
+ route-intersections/         # Новая фича
+   detector.ts                # Логика обнаружения пересечений
+   IntersectionMarkers.tsx    # Визуализация пересечений (Client Component)
+   types.ts                   # Типы для пересечений
 
 entities/
  geo-data/
