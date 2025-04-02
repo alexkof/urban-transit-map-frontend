@@ -1,12 +1,14 @@
 import {CRS, LatLngExpression} from "leaflet";
-import {MapContainer, Marker, Polyline, Popup, TileLayer} from "react-leaflet";
+import {Circle, MapContainer, Polyline, TileLayer, Tooltip} from "react-leaflet";
+import {IConflicts} from "@/features/route-intersections/detector";
 
 type IMapViewProps = {
-	center?: LatLngExpression | undefined;
 	routes: IRoute[];
+	center?: LatLngExpression | undefined;
+	conflicts: IConflicts
 }
 
-export const MapView = ({center, routes}: IMapViewProps) => {
+export const MapView = ({center, routes, conflicts}: IMapViewProps) => {
 	return (
 		<MapContainer center={center} zoom={13} style={{height: "100vh", width: "100%"}} crs={CRS.EPSG3395}>
 			<TileLayer
@@ -18,6 +20,14 @@ export const MapView = ({center, routes}: IMapViewProps) => {
 			/>
 			{routes.map((t, i) =>
 				<Polyline key={i} pathOptions={{color: t.color, weight: 4}} positions={t.points}/>
+			)}
+			{conflicts[0]?.map((p, i) =>
+				<Circle key={i} center={p} pathOptions={{fillColor: 'blue'}} radius={50}/>
+			)}
+			{conflicts[1]?.map((p, i) =>
+				<Polyline key={i} pathOptions={{ color: "blue", weight: 20, opacity: 0.3 }} positions={[p.point1, p.point2]}>
+					<Tooltip permanent direction="top">{p.route.name}</Tooltip>
+				</Polyline>
 			)}
 			{/*<Marker position={[56.838011, 60.597474]}>*/}
 			{/*	<Popup>*/}

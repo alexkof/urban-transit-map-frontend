@@ -2,20 +2,24 @@ import {useEffect, useState} from "react";
 import loadGeoJSON from "@/shared/api/loadGeoJSON";
 import {MapView} from "@/features/geo-display/MapView";
 import {LatLngExpression} from "leaflet";
+import 'leaflet/dist/leaflet.css';
+import detector, {IConflicts} from "@/features/route-intersections/detector";
 
 const ekb = [56.838011, 60.597474] as LatLngExpression;
-import 'leaflet/dist/leaflet.css';
 
 
-export default function MapWidget(){
+export default function MapWidget() {
 	const [allRoutes, setAllRoutes] = useState<IRoute[]>([])
 	const [showRoutes, setShowRoutes] = useState<IRoute[]>([])
+	const [conflicts, setConflicts] = useState<IConflicts>([[], []])
 
 	useEffect(() => {
 		const f = async () => {
 			const geoJSON = await loadGeoJSON("/test_routes.geo.json");
 			setAllRoutes(geoJSON);
 			setShowRoutes(geoJSON);
+			const _conflicts = detector(geoJSON)
+			setConflicts(_conflicts);
 		}
 		f()
 	}, []);
@@ -44,7 +48,7 @@ export default function MapWidget(){
 					Все маршруты
 				</button>
 			</div>
-			<MapView center={ekb} routes={showRoutes}/>
+			<MapView center={ekb} routes={showRoutes} conflicts={conflicts}/>
 		</div>
 	);
 };
