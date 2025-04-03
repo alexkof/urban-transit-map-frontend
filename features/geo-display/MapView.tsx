@@ -25,7 +25,7 @@ export const MapView = ({center, routes, conflicts}: IMapViewProps) => {
 				<Circle key={i} center={p} pathOptions={{fillColor: 'blue'}} radius={50}/>
 			)}
 			{conflicts[1]?.map((p, i) =>
-				<Polyline key={i} pathOptions={{ color: "blue", weight: 20, opacity: 0.3 }} positions={[p.point1, p.point2]}>
+				<Polyline key={i} pathOptions={{ color: "red", weight: 20, opacity: 0.1 }} positions={[p.point1, p.point2]}>
 					<Tooltip permanent direction="top">{p.route.name}</Tooltip>
 				</Polyline>
 			)}

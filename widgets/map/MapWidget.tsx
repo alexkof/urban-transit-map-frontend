@@ -4,6 +4,7 @@ import {MapView} from "@/features/geo-display/MapView";
 import {LatLngExpression} from "leaflet";
 import 'leaflet/dist/leaflet.css';
 import detector, {IConflicts} from "@/features/route-intersections/detector";
+import resolveConflicts from "@/features/route-intersections/resolveConflicts";
 
 const ekb = [56.838011, 60.597474] as LatLngExpression;
 
@@ -16,9 +17,10 @@ export default function MapWidget() {
 	useEffect(() => {
 		const f = async () => {
 			const geoJSON = await loadGeoJSON("/test_routes.geo.json");
-			setAllRoutes(geoJSON);
-			setShowRoutes(geoJSON);
 			const _conflicts = detector(geoJSON)
+			const _resolvedConflicts = resolveConflicts(geoJSON, _conflicts[1]);
+			setAllRoutes(_resolvedConflicts);
+			setShowRoutes(_resolvedConflicts);
 			setConflicts(_conflicts);
 		}
 		f()
