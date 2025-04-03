@@ -21,7 +21,7 @@ export default function MapWidget() {
 			const _resolvedConflicts = resolveConflicts(geoJSON, _conflicts[1]);
 			setAllRoutes(_resolvedConflicts);
 			setShowRoutes(_resolvedConflicts);
-			setConflicts(_conflicts);
+			//setConflicts(_conflicts);
 		}
 		f()
 	}, []);
