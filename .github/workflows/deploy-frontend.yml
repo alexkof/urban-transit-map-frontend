@@ -17,7 +17,7 @@ jobs:
         run: npm ci
 
       - name: Build static files
-        run: npm run build:static
+        run: npm run build
 
       - name: Upload built files to server
         uses: appleboy/scp-action@v0.1.5

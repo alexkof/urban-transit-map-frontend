@@ -6,8 +6,7 @@
     "dev": "next dev --turbopack",
     "build": "next build",
     "start": "next start",
-    "lint": "next lint",
-    "build:static": "next build && next export"
+    "lint": "next lint"
   },
   "dependencies": {
     "leaflet": "^1.9.4",
