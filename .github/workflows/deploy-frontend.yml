@@ -26,7 +26,7 @@ jobs:
           username: ${{ secrets.SERVER_USER }}
           key: ${{ secrets.SERVER_SSH_KEY }}
           source: "out/*"
-          target: "/opt/urbantransitmap/frontend-deploy/new/"
+          target: "/opt/urbantransitmap/frontend-deploy/releases/"
 
       - name: Deploy frontend on server
         uses: appleboy/ssh-action@v0.1.10
