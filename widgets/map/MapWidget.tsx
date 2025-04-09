@@ -1,4 +1,4 @@
-import {useEffect, useState} from "react";
+import React, {useEffect, useState} from "react";
 import loadGeoJSON from "@/shared/api/loadGeoJSON";
 import {MapView} from "@/features/geo-display/MapView";
 import {LatLngExpression} from "leaflet";
@@ -10,6 +10,12 @@ const ekb = [56.838011, 60.597474] as LatLngExpression;
 
 interface GeoJsonProps {
     selectedFile: string;
+}
+
+declare global {
+    interface Window {
+        setShowRoutes: React.Dispatch<React.SetStateAction<IRoute[]>>;
+    }
 }
 
 export default function MapWidget({selectedFile}: GeoJsonProps) {
@@ -29,6 +35,10 @@ export default function MapWidget({selectedFile}: GeoJsonProps) {
         }
         f()
     }, [selectedFile]);
+
+    useEffect(() => {
+        window.setShowRoutes = setShowRoutes;
+    }, [setShowRoutes]);
 
     useEffect(() => {
         console.log(showRoutes);

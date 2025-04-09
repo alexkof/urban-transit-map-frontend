@@ -19,7 +19,17 @@ export const MapView = ({center, routes, conflicts}: IMapViewProps) => {
 				// onRemove={() => handleTileClick_removeYandex()}
 			/>
 			{routes.map((t, i) =>
-				<Polyline key={i} pathOptions={{color: t.color, weight: 4}} positions={t.points}/>
+				<Polyline
+					key={i}
+					pathOptions={{color: t.color, weight: 4}}
+					positions={t.points}
+					eventHandlers={{
+						click: (event) => {
+							window.setShowRoutes([t]);
+							console.log('Клик по полилайну', t, event);
+						},
+					}}
+				/>
 			)}
 			{conflicts[0]?.map((p, i) =>
 				<Circle key={i} center={p} pathOptions={{fillColor: 'blue'}} radius={50}/>
