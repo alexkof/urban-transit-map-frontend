@@ -10,12 +10,19 @@ const MapWidget = dynamic(() => import('@/widgets/map/MapWidget'), {
 
 const VersionWidget = dynamic(() => import('@/widgets/map/VersionWidget'), {ssr: false});
 
+declare global {
+    interface Window {
+        currentGeoFile: string | null;
+    }
+}
 
 function App() {
     const [selectedFile, setSelectedFile] = useState<string>("/test_routes.geo.json");
 
+
+
     useEffect(() => {
-        (window as any).currentGeoFile = selectedFile;
+        window.currentGeoFile = selectedFile;
     }, [selectedFile]);
 
     return (
