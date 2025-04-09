@@ -2,16 +2,28 @@
 
 
 import dynamic from 'next/dynamic';
+import {useEffect, useState} from 'react';
 
-const MapContainer = dynamic(() => import('@/widgets/map/MapWidget'), {
-	ssr: false
+const MapWidget = dynamic(() => import('@/widgets/map/MapWidget'), {
+    ssr: false
 });
+
+const VersionWidget = dynamic(() => import('@/widgets/map/VersionWidget'), {ssr: false});
 
 
 function App() {
-	return (
-		<MapContainer/>
-	);
+    const [selectedFile, setSelectedFile] = useState<string>("/test_routes.geo.json");
+
+    useEffect(() => {
+        (window as any).currentGeoFile = selectedFile;
+    }, [selectedFile]);
+
+    return (
+        <div>
+            <VersionWidget setSelectedFile={setSelectedFile}/>
+            <MapWidget selectedFile={selectedFile}/>
+        </div>
+    );
 }
 
 export default App;
