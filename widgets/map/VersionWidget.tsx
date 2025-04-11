@@ -13,6 +13,10 @@ interface GeoFile {
 const geoJsonFiles: GeoFile[] = [
     { name: 'Scheme 1', file: '/test_routes.geo.json' },
     { name: 'Scheme 2 (without 68)', file: '/test_routes2.geo.json' },
+    { name: 'Все маршруты - текущая', file: '/all_routes_current.geo.json' },
+    { name: 'Трамваи - предлагаемая', file: '/tram_new.geo.json' },
+    { name: 'Трамваи - текущая', file: '/tram_current.geo.json' },
+    { name: 'Трамваи - инерционная', file: '/tram_inner.geo.json' },
 ];
 
 export default function VersionWidget({ setSelectedFile }: GeoJsonSelectorProps) {

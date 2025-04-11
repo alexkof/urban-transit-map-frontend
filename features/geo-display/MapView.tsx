@@ -40,13 +40,13 @@ export const MapView = ({center, routes, conflicts}: IMapViewProps) => {
                             position={startPoint}
                             icon={L.divIcon({
                                 className: 'custom-text-label',
-                                html: `<span style="font-size: 20px; color: ${t.color}; font-weight: bold">${t.name}</span>>`,
+                                html: `<span style="font-size: 20px; color: ${t.color}; font-weight: bold">${t.name}</span>`,
                             })}/>
                             <Marker
                             position={endPoint}
                             icon={L.divIcon({
                                 className: 'custom-text-label',
-                                html: `<span style="font-size: 20px; color: ${t.color}; font-weight: bold">${t.name}</span>>`,
+                                html: `<span style="font-size: 20px; color: ${t.color}; font-weight: bold">${t.name}</span>`,
                             })}/>
 
                         </React.Fragment>
