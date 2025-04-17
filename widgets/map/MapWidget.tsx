@@ -46,7 +46,7 @@ export default function MapWidget({selectedFile}: GeoJsonProps) {
 
     return (
         <div className="relative">
-            <div className="absolute top-2.5 right-2.5 bg-white p-1.5 border border-black z-[1000]">
+            <div className="absolute top-2.5 right-2.5 size bg-white p-1.5 border border-black z-[1000] overflow-scroll w-1/6 h-fit max-h-full">
                 <h3 className="text-lg font-semibold">Маршруты</h3>
                 <button
                     className="block my-1.25 w-full text-left"
