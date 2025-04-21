@@ -1,8 +1,13 @@
-import {CRS, LatLngExpression} from "leaflet";
-import {Circle, MapContainer, Marker, Polyline, TileLayer, Tooltip} from "react-leaflet";
+import {Circle, MapContainer, Marker, Polyline, TileLayer, Tooltip, FeatureGroup} from "react-leaflet";
 import {IConflicts} from "@/features/route-intersections/detector";
-import React from "react";
-import L from "leaflet";
+import React, { useRef } from 'react';
+import L, {CRS, LatLngExpression} from 'leaflet';
+
+import 'leaflet/dist/leaflet.css';
+import 'leaflet-draw/dist/leaflet.draw.css';
+import {EditControl} from 'react-leaflet-draw';
+import 'react-leaflet-draw';
+import * as turf from '@turf/turf';
 
 type IMapViewProps = {
     routes: IRoute[];
@@ -10,9 +15,50 @@ type IMapViewProps = {
     conflicts: IConflicts
 }
 
+
 export const MapView = ({center, routes, conflicts}: IMapViewProps) => {
+    const mapRef = useRef<L.Map>(null);
+    const drawControlRef = useRef<any>(null);
+
+
+    const onCreated = (e: any) => {
+        const filtered = routes.filter(route => {
+            const line = turf.lineString(route.points.map(p => [p[1], p[0]])); // [lng, lat]
+            return turf.booleanIntersects(line, e.layer.toGeoJSON());
+        });
+        window.setShowRoutes(filtered);
+        e.layer.remove();
+    };
+
+
+
     return (
-        <MapContainer center={center} zoom={13} style={{height: "100vh", width: "100%"}} crs={CRS.EPSG3395}>
+        <MapContainer
+            ref={mapRef}
+
+            center={center}
+            zoom={13}
+            style={{height: "100vh", width: "100%"}}
+            crs={CRS.EPSG3395}>
+            <FeatureGroup>
+                <EditControl
+                    ref={drawControlRef}
+                    position="topleft"
+                    onCreated={onCreated}
+                    draw={{
+                        rectangle: true,
+                        polygon: true,
+                        polyline: false,
+                        circle: false,
+                        marker: false,
+                        circlemarker: false,
+                    }}
+                    edit={{
+                        remove: false,
+                        edit: false
+                    }}
+                />
+            </FeatureGroup>
             <TileLayer
                 url='https://core-renderer-tiles.maps.yandex.net/tiles?l=map&x={x}&y={y}&z={z}&scale=1&lang=ru_RU'
                 subdomains={['01', '02', '03', '04']}
@@ -21,8 +67,8 @@ export const MapView = ({center, routes, conflicts}: IMapViewProps) => {
                 // onRemove={() => handleTileClick_removeYandex()}
             />
             {routes.map((t, i) => {
-                    const startPoint = t.points[0]||[0,0];
-                    const endPoint = t.points[t.points.length - 1]||[0,0];
+                    const startPoint = t.points[0] || [0, 0];
+                    const endPoint = t.points[t.points.length - 1] || [0, 0];
                     return (
                         <React.Fragment key={i}>
                             <Polyline
@@ -37,17 +83,17 @@ export const MapView = ({center, routes, conflicts}: IMapViewProps) => {
                                 }}
                             />
                             <Marker
-                            position={startPoint}
-                            icon={L.divIcon({
-                                className: 'custom-text-label',
-                                html: `<span style="font-size: 20px; color: ${t.color}; font-weight: bold">${t.name}</span>`,
-                            })}/>
+                                position={startPoint}
+                                icon={L.divIcon({
+                                    className: 'custom-text-label',
+                                    html: `<span style="font-size: 20px; color: ${t.color}; font-weight: bold">${t.name}</span>`,
+                                })}/>
                             <Marker
-                            position={endPoint}
-                            icon={L.divIcon({
-                                className: 'custom-text-label',
-                                html: `<span style="font-size: 20px; color: ${t.color}; font-weight: bold">${t.name}</span>`,
-                            })}/>
+                                position={endPoint}
+                                icon={L.divIcon({
+                                    className: 'custom-text-label',
+                                    html: `<span style="font-size: 20px; color: ${t.color}; font-weight: bold">${t.name}</span>`,
+                                })}/>
 
                         </React.Fragment>
                     );

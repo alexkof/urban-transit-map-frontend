@@ -18,7 +18,7 @@ declare global {
 
 function App() {
     const [selectedFile, setSelectedFile] = useState<string>("/test_routes.geo.json");
-
+    const [selectedGeoJSON, setSelectedGeoJSON] = useState<any | null>(null);
 
 
     useEffect(() => {
@@ -27,8 +27,14 @@ function App() {
 
     return (
         <div>
-            <VersionWidget setSelectedFile={setSelectedFile}/>
-            <MapWidget selectedFile={selectedFile}/>
+            <VersionWidget
+                setSelectedFile={setSelectedFile}
+                setSelectedGeoJSON={setSelectedGeoJSON}
+            />
+            <MapWidget
+                selectedFile={selectedFile}
+                uploadedGeoJSON={selectedGeoJSON}
+            />
         </div>
     );
 }

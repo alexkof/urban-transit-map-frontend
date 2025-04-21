@@ -7,21 +7,41 @@ import detector, {IConflicts} from "@/features/route-intersections/detector";
 import resolveConflicts from "@/features/route-intersections/resolveConflicts";
 
 const ekb = [56.838011, 60.597474] as LatLngExpression;
-
-interface GeoJsonProps {
-    selectedFile: string;
-}
-
 declare global {
     interface Window {
         setShowRoutes: React.Dispatch<React.SetStateAction<IRoute[]>>;
     }
 }
 
-export default function MapWidget({selectedFile}: GeoJsonProps) {
+interface MapWidgetProps {
+    selectedFile: string;
+    uploadedGeoJSON?: any | null;
+}
+
+
+export default function MapWidget({selectedFile, uploadedGeoJSON}: MapWidgetProps) {
     const [allRoutes, setAllRoutes] = useState<IRoute[]>([])
     const [showRoutes, setShowRoutes] = useState<IRoute[]>([])
     const [conflicts, setConflicts] = useState<IConflicts>([[], []])
+
+
+    useEffect(() => {
+        const f = async () => {
+            let geo;
+            if (uploadedGeoJSON) {
+                geo = uploadedGeoJSON;
+            } else {
+                geo = await loadGeoJSON(selectedFile);
+            }
+            const _conflicts = detector(geo);
+            const _resolved = resolveConflicts(geo, _conflicts[1]);
+            setAllRoutes(_resolved);
+            setShowRoutes(_resolved);
+            // setConflicts(_conflicts);
+        };
+        f();
+    }, [selectedFile, uploadedGeoJSON]);
+
 
     useEffect(() => {
         const f = async () => {
