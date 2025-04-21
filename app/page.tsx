@@ -17,7 +17,7 @@ declare global {
 }
 
 function App() {
-    const [selectedFile, setSelectedFile] = useState<string>("/test_routes.geo.json");
+    const [selectedFile, setSelectedFile] = useState<string>("/routes_with_segment_refs.geo.json");
     const [selectedGeoJSON, setSelectedGeoJSON] = useState<any | null>(null);
 
 

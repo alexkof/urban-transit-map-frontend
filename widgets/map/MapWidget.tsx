@@ -3,8 +3,7 @@ import loadGeoJSON from "@/shared/api/loadGeoJSON";
 import {MapView} from "@/features/geo-display/MapView";
 import {LatLngExpression} from "leaflet";
 import 'leaflet/dist/leaflet.css';
-import detector, {IConflicts} from "@/features/route-intersections/detector";
-import resolveConflicts from "@/features/route-intersections/resolveConflicts";
+import {getSegmentLib} from "@/features/route-intersections/getSegmentLib";
 
 const ekb = [56.838011, 60.597474] as LatLngExpression;
 declare global {
@@ -18,11 +17,11 @@ interface MapWidgetProps {
     uploadedGeoJSON?: any | null;
 }
 
+const segmentLib = getSegmentLib();
 
 export default function MapWidget({selectedFile, uploadedGeoJSON}: MapWidgetProps) {
     const [allRoutes, setAllRoutes] = useState<IRoute[]>([])
     const [showRoutes, setShowRoutes] = useState<IRoute[]>([])
-    const [conflicts, setConflicts] = useState<IConflicts>([[], []])
 
 
     useEffect(() => {
@@ -33,10 +32,8 @@ export default function MapWidget({selectedFile, uploadedGeoJSON}: MapWidgetProp
             } else {
                 geo = await loadGeoJSON(selectedFile);
             }
-            const _conflicts = detector(geo);
-            const _resolved = resolveConflicts(geo, _conflicts[1]);
-            setAllRoutes(_resolved);
-            setShowRoutes(_resolved);
+            setAllRoutes(geo);
+            setShowRoutes(geo);
             // setConflicts(_conflicts);
         };
         f();
@@ -47,10 +44,9 @@ export default function MapWidget({selectedFile, uploadedGeoJSON}: MapWidgetProp
         const f = async () => {
             const geoJSON = await loadGeoJSON(selectedFile);
             // const geoJSON = await loadGeoJSON("/test_routes.geo.json");
-            const _conflicts = detector(geoJSON)
-            const _resolvedConflicts = resolveConflicts(geoJSON, _conflicts[1]);
-            setAllRoutes(_resolvedConflicts);
-            setShowRoutes(_resolvedConflicts);
+            // const _conflicts = detector(geoJSON)
+            setAllRoutes(geoJSON);
+            setShowRoutes(geoJSON);
             //setConflicts(_conflicts);
         }
         f()
@@ -85,7 +81,7 @@ export default function MapWidget({selectedFile, uploadedGeoJSON}: MapWidgetProp
                 ))}
 
             </div>
-            <MapView center={ekb} routes={showRoutes} conflicts={conflicts}/>
+            <MapView center={ekb} routes={showRoutes} segmentLib={segmentLib}/>
         </div>
     );
 };

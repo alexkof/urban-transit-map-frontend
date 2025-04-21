@@ -1,35 +1,35 @@
 import getRandomColor from "@/shared/helpers/getRandomColor";
 
+interface IRouteSegmentRef {
+	segment_id: number;
+	is_reversed: boolean;
+}
+
 export function parseGeoJSONRoutes(geoJson: GeoJSON.FeatureCollection): IRoute[] {
-	if (!geoJson || !geoJson.features) return [];
-	return geoJson.features.map(feature => {
-		// Проверяем тип геометрии и наличие свойств
-		if (feature.geometry?.type !== 'LineString' || !feature.properties) {
-			console.warn('Invalid route feature detected');
-			return null;
-		}
+	if (!geoJson?.features) return [];
 
-		// Извлекаем номер маршрута из свойств
-		const routeNumber = feature.properties.Number;
-		const coordinates = feature.geometry.coordinates;
-
-		// Преобразуем координаты в точки с валидацией
-		const points: IPoint[] = coordinates
-			.map(coord => {
-				if (coord.length >= 2 &&
-					typeof coord[0] === 'number' &&
-					typeof coord[1] === 'number') {
-					return [coord[1], coord[0]] as IPoint;
-				}
-				console.warn('Invalid coordinate format', coord);
+	return geoJson.features
+		.map(feature => {
+			if (feature.geometry?.type !== 'LineString' || !feature.properties) {
+				console.warn('Invalid route feature detected');
 				return null;
-			})
-			.filter((point): point is IPoint => point !== null);
+			}
 
-		return {
-			name: routeNumber?.toString() || 'unnamed',
-			points: points,
-			color: getRandomColor(),
-		};
-	}).filter((route): route is IRoute => route !== null);
+			const routeNumber = feature.properties.Number;
+			const segmentRefs = feature.properties.segment_refs as IRouteSegmentRef[];
+
+			console.log(geoJson)
+
+			// Преобразуем сегменты в формат ключей библиотеки
+			const segments = (segmentRefs || [])
+				.map(({ segment_id }) => String(segment_id)) // Преобразуем ID в строку
+				.filter(Boolean);
+
+			return {
+				name: routeNumber?.toString() || 'unnamed',
+				segments: segments,
+				color: getRandomColor(),
+			};
+		})
+		.filter((route): route is IRoute => route !== null);
 }

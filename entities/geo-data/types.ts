@@ -1,7 +1,7 @@
 interface IRoute {
 	name: string;
-	segments: keyof ISegmentLib[];
-	color: string
+	segments: string[]; // keyof ISegmentLib[];
+	color: string;
 }
 
 type ISegmentLib = Map<string, ISegment>;
