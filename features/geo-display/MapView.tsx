@@ -25,7 +25,10 @@ export const MapView = ({center, routes, segmentLib}: IMapViewProps) => {
 		const points: IPoint[] = [];
 
 		// Обрабатываем первый сегмент полностью
-		const firstSegment = segmentLib.get(route.segments[0].segment_id);
+		let firstSegment = segmentLib.get(route.segments[0].segment_id);
+		if (firstSegment && route.segments[0].is_reversed) {
+			firstSegment = firstSegment.reverse();
+		}
 		if (firstSegment) {
 			points.push(...firstSegment);
 		}
@@ -33,11 +36,19 @@ export const MapView = ({center, routes, segmentLib}: IMapViewProps) => {
 		// Обрабатываем остальные сегменты, добавляя только точки с индекса 1
 		for (let i = 1; i < route.segments.length; i++) {
 			const segmentKey = route.segments[i];
-			const segmentPoints = segmentLib.get(segmentKey.segment_id);
+			let segmentPoints = segmentLib.get(segmentKey.segment_id);
+
+			if (segmentPoints) {
+				segmentPoints = segmentPoints.slice(1)
+			}
+
+			if (segmentKey.is_reversed) {
+				segmentPoints = segmentPoints!.reverse();
+			}
 
 			if (segmentPoints && segmentPoints.length > 0) {
 				// Добавляем все точки, кроме первой (чтобы избежать дублирования)
-				points.push(...segmentPoints.slice(1));
+				points.push(...segmentPoints);
 			}
 		}
 
@@ -94,9 +105,9 @@ export const MapView = ({center, routes, segmentLib}: IMapViewProps) => {
 				// onRemove={() => handleTileClick_removeYandex()}
 			/>
 			{routes.map((t, i) => {
-					console.log(segmentLib, t.segments[0].segment_id)
+					// console.log(t, getRoutePoints(t))
 					const startPoint = segmentLib.get(t.segments[0].segment_id)![0] || [0, 0];
-					const endPoint = segmentLib.get(t.segments[0].segment_id)!.at(-1) || [0, 0];
+					const endPoint = segmentLib.get(t.segments.at(-1)!.segment_id)!.at(-1) || [0, 0];
 					return (
 						<React.Fragment key={i}>
 							<Polyline
