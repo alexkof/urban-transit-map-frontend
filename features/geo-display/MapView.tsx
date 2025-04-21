@@ -73,7 +73,6 @@ export const MapView = ({center, routes, segmentLib}: IMapViewProps) => {
 				// onRemove={() => handleTileClick_removeYandex()}
 			/>
 			{routes.map((t, i) => {
-					console.log(t)
 					const startPoint = segmentLib.get(t.segments[0])![0] || [0, 0];
 					const endPoint = segmentLib.get(t.segments[0])!.at(-1) || [0, 0];
 					return (
