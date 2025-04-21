@@ -12,7 +12,7 @@ WORKDIR /app
 COPY --from=builder /app/package*.json ./
 COPY --from=builder /app/.next ./.next
 COPY --from=builder /app/public ./public
-RUN npm install --only=production
+RUN npm install --only=production --force
 
 CMD ["npm", "start"]
 
