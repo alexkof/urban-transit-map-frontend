@@ -1,4 +1,4 @@
-import {Circle, FeatureGroup, MapContainer, Marker, Polyline, TileLayer, Tooltip} from "react-leaflet";
+import {FeatureGroup, MapContainer, Marker, Polyline, TileLayer} from "react-leaflet";
 import React, {useRef} from 'react';
 import L, {CRS, LatLngExpression} from 'leaflet';
 
@@ -20,7 +20,28 @@ export const MapView = ({center, routes, segmentLib}: IMapViewProps) => {
 	const drawControlRef = useRef<any>(null);
 
 	const getRoutePoints = (route: IRoute): IPoint[] => {
-		return route.segments.flatMap(segKey => segmentLib.get(segKey) ?? []);
+		if (!route.segments?.length) return [];
+
+		const points: IPoint[] = [];
+
+		// Обрабатываем первый сегмент полностью
+		const firstSegment = segmentLib.get(route.segments[0]);
+		if (firstSegment) {
+			points.push(...firstSegment);
+		}
+
+		// Обрабатываем остальные сегменты, добавляя только точки с индекса 1
+		for (let i = 1; i < route.segments.length; i++) {
+			const segmentKey = route.segments[i];
+			const segmentPoints = segmentLib.get(segmentKey);
+
+			if (segmentPoints && segmentPoints.length > 0) {
+				// Добавляем все точки, кроме первой (чтобы избежать дублирования)
+				points.push(...segmentPoints.slice(1));
+			}
+		}
+
+		return points;
 	};
 
 
@@ -73,6 +94,7 @@ export const MapView = ({center, routes, segmentLib}: IMapViewProps) => {
 				// onRemove={() => handleTileClick_removeYandex()}
 			/>
 			{routes.map((t, i) => {
+					console.log(t)
 					const startPoint = segmentLib.get(t.segments[0])![0] || [0, 0];
 					const endPoint = segmentLib.get(t.segments[0])!.at(-1) || [0, 0];
 					return (
