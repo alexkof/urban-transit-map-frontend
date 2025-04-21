@@ -1,7 +1,7 @@
 import geoJSONData from './all_lines_with_ids.geo.json';
 // Функция преобразования GeoJSON в библиотеку сегментов
 export const getSegmentLib = (): ISegmentLib => {
-	const segmentLib = new Map<string, ISegment>();
+	const segmentLib = new Map<number, ISegment>();
 
 	geoJSONData.features.forEach(feature => {
 		// Проверяем наличие ID и правильный тип геометрии
@@ -13,7 +13,7 @@ export const getSegmentLib = (): ISegmentLib => {
 		);
 
 		// Используем ID сегмента как ключ (преобразуем в строку)
-		segmentLib.set(String(feature.id), points);
+		segmentLib.set(feature.id, points);
 	});
 
 	return segmentLib;

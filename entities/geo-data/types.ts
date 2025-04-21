@@ -1,10 +1,15 @@
 interface IRoute {
 	name: string;
-	segments: string[]; // keyof ISegmentLib[];
+	segments: IRouteSegmentRef[];
 	color: string;
 }
 
-type ISegmentLib = Map<string, ISegment>;
+interface IRouteSegmentRef {
+	segment_id: number; // keyof ISegmentLib[];
+	is_reversed: boolean;
+}
+
+type ISegmentLib = Map<number, ISegment>;
 
 type ISegment = IPoint[];
 

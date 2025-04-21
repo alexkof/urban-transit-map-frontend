@@ -18,11 +18,8 @@ export function parseGeoJSONRoutes(geoJson: GeoJSON.FeatureCollection): IRoute[]
 			const routeNumber = feature.properties.Number;
 			const segmentRefs = feature.properties.segment_refs as IRouteSegmentRef[];
 
-			//console.log(geoJson)
-
 			// Преобразуем сегменты в формат ключей библиотеки
 			const segments = (segmentRefs || [])
-				.map(({ segment_id }) => String(segment_id)) // Преобразуем ID в строку
 				.filter(Boolean);
 
 			return {
