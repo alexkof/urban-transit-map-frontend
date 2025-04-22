@@ -70,8 +70,25 @@ def create_route_references(routes_file, segments_file, output_file):
 
 
 if __name__ == "__main__":
-    create_route_references(
-        routes_file='public/all_routes_current.geo.json',
-        segments_file='public/all_lines_with_ids.geo.json',
-        output_file='public/routes_with_segment_refs.geo.json'
-    )
+    names = [
+        'test_routes2.geo.json',
+        'all_routes_current.geo.json',
+        'tram_new.geo.json',
+        'tram_current.geo.json',
+        'tram_inner.geo.json'
+    ]
+
+    names_with_ids = [
+        'test_routes2_with_ids.geo.json',
+        'all_routes_current_with_ids.geo.json',
+        'tram_new_with_ids.geo.json',
+        'tram_current_with_ids.geo.json',
+        'tram_inner_with_ids.geo.json'
+    ]
+
+    for i in range(len(names)):
+        create_route_references(
+            routes_file=f'../public/{names[i]}',
+            segments_file=f'../public/all_lines_with_ids.geo.json',
+            output_file=f'../public/{names[i].split('.')[0]}_with_segment_refs.geo.json'
+        )

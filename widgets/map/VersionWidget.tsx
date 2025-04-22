@@ -14,11 +14,11 @@ interface GeoFile {
 // Список доступных geojson-файлов
 const geoJsonFiles: GeoFile[] = [
     { name: 'Scheme 1', file: '/routes_with_segment_refs.geo.json' },
-    // { name: 'Scheme 2 (without 68)', file: '/test_routes2.geo.json' },
-    // { name: 'Все маршруты - текущая', file: '/all_routes_current.geo.json' },
-    // { name: 'Трамваи - предлагаемая', file: '/tram_new.geo.json' },
-    // { name: 'Трамваи - текущая', file: '/tram_current.geo.json' },
-    // { name: 'Трамваи - инерционная', file: '/tram_inner.geo.json' },
+    { name: 'Scheme 2 (without 68)', file: '/test_routes2_with_ids.geo.json' },
+    { name: 'Все маршруты - текущая', file: '/all_routes_current_with_ids.geo.json' },
+    { name: 'Трамваи - предлагаемая', file: '/tram_new_with_ids.geo.json' },
+    { name: 'Трамваи - текущая', file: '/tram_current_with_ids.geo.json' },
+    { name: 'Трамваи - инерционная', file: '/tram_inner_with_ids.geo.json' },
 ];
 
 export default function VersionWidget({ setSelectedFile, setSelectedGeoJSON }: GeoJsonSelectorProps) {

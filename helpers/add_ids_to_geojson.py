@@ -32,4 +32,16 @@ def add_ids_to_geojson(input_file, output_file):
 
 # Пример использования
 if __name__ == "__main__":
-    add_ids_to_geojson('public/all_lines.geo.json', 'public/all_lines_with_ids.geo.json')
+    names = [
+        'test_routes2.geo.json',
+        'all_routes_current.geo.json',
+        'tram_new.geo.json',
+        'tram_current.geo.json',
+        'tram_inner.geo.json'
+    ]
+
+    for name in names:
+        out_name = f'/public/{name.split(".")[0]}_with_ids.geo.json'
+        add_ids_to_geojson(f'../public/{name.split('.')[0]}_with_segment_refs.geo.json', '..'+out_name)
+        print(out_name)
+    # add_ids_to_geojson('public/all_lines.geo.json', 'public/all_lines_with_ids.geo.json')
