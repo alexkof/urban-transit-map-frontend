@@ -149,7 +149,7 @@ export default function MapWidget(/*{selectedFile, uploadedGeoJSON}: MapWidgetPr
                     </div>
                     <div className="mb-4">
                         <button onClick={() => setShowRoutes(allRoutes)}
-                                className="w-full bg-blue-500 text-white py-2 rounded">Все маршруты
+                                className="w-full bg-blue-500 text-white py-2 rounded cursor-pointer hover:shadow-md transition">Все маршруты
                         </button>
                     </div>
                     <div className="space-y-3">
