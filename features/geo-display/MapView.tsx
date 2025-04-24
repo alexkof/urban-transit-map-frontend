@@ -100,7 +100,9 @@ export const MapView = ({center = [56.838011, 60.597474], routes, segmentLib}: I
 			if (!baseSegment) continue;
 
 			const count = routesForSegment.length;
-			const offsetStep = 7; // метров между линиями
+			const offsetStep = 2; // метров между линиями
+
+			routesForSegment.sort((a, b)=>a.name.localeCompare(b.name));
 
 			routesForSegment.forEach((route, idx) => {
 				// Определяем направление сегмента для этого маршрута
