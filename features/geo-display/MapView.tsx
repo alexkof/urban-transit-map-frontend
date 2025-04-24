@@ -1,4 +1,4 @@
-import {FeatureGroup, MapContainer, Marker, Polyline, TileLayer} from "react-leaflet";
+import {FeatureGroup, MapContainer, Marker, Polyline, TileLayer, ZoomControl} from "react-leaflet";
 import React, {useRef} from 'react';
 import L, {CRS, LatLngExpression} from 'leaflet';
 
@@ -73,15 +73,16 @@ export const MapView = ({center, routes, segmentLib}: IMapViewProps) => {
 	return (
 		<MapContainer
 			ref={mapRef}
-
+			attributionControl={false}
 			center={center}
 			zoom={13}
+			zoomControl={false}
 			style={{height: "100vh", width: "100%"}}
 			crs={CRS.EPSG3395}>
 			<FeatureGroup>
 				<EditControl
 					ref={drawControlRef}
-					position="topleft"
+					position="topright"
 					onCreated={onCreated}
 					draw={{
 						rectangle: true,
@@ -104,6 +105,7 @@ export const MapView = ({center, routes, segmentLib}: IMapViewProps) => {
 				// onAdd={() => handleTileClick_addYandex()}
 				// onRemove={() => handleTileClick_removeYandex()}
 			/>
+			<ZoomControl position="topright"/>
 			{routes.map((t, i) => {
 					// console.log(t, getRoutePoints(t))
 					const startPoint = segmentLib.get(t.segments[0].segment_id)![0] || [0, 0];

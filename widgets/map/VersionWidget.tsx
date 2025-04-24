@@ -70,3 +70,6 @@ export default function VersionWidget({ setSelectedFile, setSelectedGeoJSON }: G
         </div>
     );
 }
+
+
+// код перенесен в MapWidget
