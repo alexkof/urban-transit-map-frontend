@@ -1,9 +1,9 @@
-import { FeatureGroup, MapContainer, Marker, Polyline, TileLayer } from "react-leaflet";
-import React, { useRef } from 'react';
-import L, { CRS, LatLngExpression } from 'leaflet';
+import {FeatureGroup, MapContainer, Marker, Polyline, TileLayer} from "react-leaflet";
+import React, {useRef} from 'react';
+import L, {CRS, LatLngExpression} from 'leaflet';
 import 'leaflet/dist/leaflet.css';
 import 'leaflet-draw/dist/leaflet.draw.css';
-import { EditControl } from 'react-leaflet-draw';
+import {EditControl} from 'react-leaflet-draw';
 import 'react-leaflet-draw';
 import * as turf from '@turf/turf';
 
@@ -13,7 +13,7 @@ type IMapViewProps = {
 	segmentLib: ISegmentLib;
 };
 
-export const MapView = ({ center = [56.838011, 60.597474], routes, segmentLib }: IMapViewProps) => {
+export const MapView = ({center = [56.838011, 60.597474], routes, segmentLib}: IMapViewProps) => {
 	const mapRef = useRef<L.Map>(null);
 	const drawControlRef = useRef<any>(null);
 
@@ -80,7 +80,70 @@ export const MapView = ({ center = [56.838011, 60.597474], routes, segmentLib }:
 	};
 
 	/**
-	 * Renders a single route with its segments and markers
+	 * Renders routes with offset polylines for overlapping segments
+	 */
+	const renderRoutesWithOffsets = () => {
+		const segmentToRoutes = new Map<number, IRoute[]>();
+		routes.forEach(route => {
+			route.segments.forEach(segment => {
+				const routesBefore = segmentToRoutes.get(segment.segment_id);
+				segmentToRoutes.set(segment.segment_id, routesBefore ? [...routesBefore, route] : [route]);
+			})
+		});
+
+		const segmentToDraw = [] as { name: string, color: string, points: IPoint[] }[];
+
+
+		for (const [segment_id, routesForSegment] of segmentToRoutes) {
+			// Получаем сам сегмент из библиотеки
+			const baseSegment = segmentLib.get(segment_id);
+			if (!baseSegment) continue;
+
+			const count = routesForSegment.length;
+			const offsetStep = 7; // метров между линиями
+
+			routesForSegment.forEach((route, idx) => {
+				// Определяем направление сегмента для этого маршрута
+				const segmentKey = route.segments.find(s => s.segment_id === segment_id);
+				let segmentPoints = baseSegment;
+				if (segmentKey?.is_reversed) {
+					segmentPoints = [...baseSegment].reverse();
+				}
+
+				// Смещение: центрируем относительно 0
+				let offset = 0;
+				if (count > 1) {
+					offset = (idx - (count - 1) / 2) * offsetStep;
+				}
+
+				// Строим смещённую линию через turf
+				const turfLine = turf.lineString(segmentPoints.map(p => [p[1], p[0]]));
+				const offsetLine = turf.lineOffset(turfLine, offset, {units: 'meters'});
+				const offsetCoords = (offsetLine.geometry.coordinates as IPoint[]).map(([lng, lat]) => [lat, lng]) as IPoint[];
+
+				segmentToDraw.push({
+					name: route.name,
+					color: route.color,
+					points: offsetCoords,
+				});
+			});
+		}
+
+
+		return (
+			segmentToDraw.map((segment, index) => (
+				<Polyline
+					key={index}
+					positions={segment.points}
+					color={segment.color}
+					weight={4}
+				/>
+			))
+		)
+	};
+
+	/**
+	 * Renders a single route with its segments and markers (legacy method)
 	 */
 	const renderRoute = (route: IRoute, index: number) => {
 		const segments = getRouteSegments(route);
@@ -94,7 +157,7 @@ export const MapView = ({ center = [56.838011, 60.597474], routes, segmentLib }:
 				{segments.map((segment, segmentIndex) => (
 					<Polyline
 						key={`segment-${segmentIndex}`}
-						pathOptions={{ color: route.color, weight: 4 }}
+						pathOptions={{color: route.color, weight: 2}}
 						positions={segment}
 						eventHandlers={{
 							click: () => window.setShowRoutes?.([route]),
@@ -102,8 +165,8 @@ export const MapView = ({ center = [56.838011, 60.597474], routes, segmentLib }:
 					/>
 				))}
 
-				<RouteLabel position={startPoint} color={route.color} text={route.name} />
-				<RouteLabel position={endPoint} color={route.color} text={route.name} />
+				<RouteLabel position={startPoint} color={route.color} text={route.name}/>
+				<RouteLabel position={endPoint} color={route.color} text={route.name}/>
 			</React.Fragment>
 		);
 	};
@@ -111,7 +174,7 @@ export const MapView = ({ center = [56.838011, 60.597474], routes, segmentLib }:
 	/**
 	 * Component for route labels (start/end markers)
 	 */
-	const RouteLabel = ({ position, color, text }: { position: LatLngExpression, color: string, text: string }) => (
+	const RouteLabel = ({position, color, text}: { position: LatLngExpression, color: string, text: string }) => (
 		<Marker
 			position={position}
 			icon={L.divIcon({
@@ -126,7 +189,7 @@ export const MapView = ({ center = [56.838011, 60.597474], routes, segmentLib }:
 			ref={mapRef}
 			center={center}
 			zoom={13}
-			style={{ height: "100vh", width: "100%" }}
+			style={{height: "100vh", width: "100%"}}
 			crs={CRS.EPSG3395}
 		>
 			<TileLayer
@@ -155,7 +218,7 @@ export const MapView = ({ center = [56.838011, 60.597474], routes, segmentLib }:
 				/>
 			</FeatureGroup>
 
-			{routes.map(renderRoute)}
+			{renderRoutesWithOffsets()}
 		</MapContainer>
 	);
 };
