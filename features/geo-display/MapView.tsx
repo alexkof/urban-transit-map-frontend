@@ -19,6 +19,21 @@ export const MapView = ({center, routes, segmentLib}: IMapViewProps) => {
 	const mapRef = useRef<L.Map>(null);
 	const drawControlRef = useRef<any>(null);
 
+	const getRouteSegments = (route: IRoute): IPoint[][] => {
+		if (!route.segments?.length) return [];
+
+		const segments = [] as IPoint[][];
+
+		for (let i = 1; i < route.segments.length; i++) {
+			const segmentKey = route.segments[i];
+			const segmentPoints = segmentLib.get(segmentKey.segment_id);
+			if (segmentPoints) {
+				segments.push(segmentPoints);
+			}
+		}
+		return segments;
+	};
+
 	const getRoutePoints = (route: IRoute): IPoint[] => {
 		if (!route.segments?.length) return [];
 
@@ -105,22 +120,24 @@ export const MapView = ({center, routes, segmentLib}: IMapViewProps) => {
 				// onRemove={() => handleTileClick_removeYandex()}
 			/>
 			{routes.map((t, i) => {
-					// console.log(t, getRoutePoints(t))
-					const startPoint = segmentLib.get(t.segments[0].segment_id)![0] || [0, 0];
-					const endPoint = segmentLib.get(t.segments.at(-1)!.segment_id)!.at(-1) || [0, 0];
+					const segments = getRouteSegments(t);
+					const startPoint = segments.at(0)?.at(0) || [0, 0];
+					const endPoint = segments.at(-1)?.at(-1) || [0, 0];
 					return (
 						<React.Fragment key={i}>
-							<Polyline
-								key={i}
-								pathOptions={{color: t.color, weight: 4}}
-								positions={getRoutePoints(t)}
-								eventHandlers={{
-									click: (event) => {
-										window.setShowRoutes([t]);
-										console.log('Клик по полилайну', t, event);
-									},
-								}}
-							/>
+							{segments.map((segment, j) =>
+								<Polyline
+									key={j}
+									pathOptions={{color: t.color, weight: 4}}
+									positions={segment}
+									eventHandlers={{
+										click: (event) => {
+											window.setShowRoutes([t]);
+											console.log('Клик по полилайну', t, event);
+										},
+									}}
+								/>
+							)}
 							<Marker
 								position={startPoint}
 								icon={L.divIcon({
