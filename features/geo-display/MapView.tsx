@@ -117,9 +117,9 @@ export const MapView = ({center = [56.838011, 60.597474], routes, segmentLib}: I
 				const offsetLine = turf.lineOffset(turfLine, offset, {units: 'meters'});
 				let offsetCoords = (offsetLine.geometry.coordinates as IPoint[]).map(([lng, lat]) => [lat, lng]) as IPoint[];
 
-				if (segmentKey?.is_reversed) {
-					offsetCoords = [...baseSegment].reverse();
-				}
+				// if (segmentKey?.is_reversed) {
+				// 	offsetCoords = [...baseSegment].reverse();
+				// }
 
 
 				segmentToDraw.push({
