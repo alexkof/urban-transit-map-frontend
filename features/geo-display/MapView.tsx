@@ -22,7 +22,6 @@ export const MapView = ({center = [56.838011, 60.597474], routes, segmentLib}: I
      */
     const getRouteSegments = (route: IRoute): IPoint[][] => {
         return route.segments
-            ?.slice(1) // Skip first segment (handled separately in getRoutePoints)
             .map(segmentKey => {
                 const segment = segmentLib.get(segmentKey.segment_id);
                 return segmentKey.is_reversed ? segment?.reverse() : segment;
@@ -137,8 +136,7 @@ export const MapView = ({center = [56.838011, 60.597474], routes, segmentLib}: I
                 <Polyline
                     key={index}
                     positions={segment.points}
-                    color={segment.color}
-                    weight={4}
+                    pathOptions={{color: segment.color, weight: 4}}
                 />
             ))
         )
