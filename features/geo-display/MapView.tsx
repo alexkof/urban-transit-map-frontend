@@ -20,8 +20,8 @@ function ZoomEvent({setOffset, setPolylineWidth}: {
 
 	const map = useMapEvents({
 		zoom(e) {
-			const offset = Math.pow(6, (18 / e.target._zoom));
-			const width = Math.pow(2.3, (e.target._zoom/9));
+			const offset = Math.pow(10, (18 / e.target._zoom));
+			const width = Math.pow(2, (e.target._zoom/9));
 			console.log(`zoom=${e.target._zoom}, offset=${offset}, width=${width}`);
 			setOffset(offset);
 			setPolylineWidth(width);
