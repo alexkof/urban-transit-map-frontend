@@ -1,5 +1,5 @@
-import {FeatureGroup, MapContainer, Marker, Polyline, TileLayer, ZoomControl} from "react-leaflet";
-import React, {useRef} from 'react';
+import {FeatureGroup, MapContainer, Marker, Polyline, TileLayer, useMapEvents, ZoomControl} from "react-leaflet";
+import React, {useEffect, useRef, useState} from 'react';
 import L, {CRS, LatLngExpression} from 'leaflet';
 import 'leaflet/dist/leaflet.css';
 import 'leaflet-draw/dist/leaflet.draw.css';
@@ -13,9 +13,36 @@ type IMapViewProps = {
 	segmentLib: ISegmentLib;
 };
 
+function ZoomEvent({setOffset, setPolylineWidth}: {
+	setOffset: (offset: number) => void,
+	setPolylineWidth: (width: number) => void
+}) {
+
+	const map = useMapEvents({
+		zoom(e) {
+			const offset = Math.pow(6, (18 / e.target._zoom));
+			const width = Math.pow(2.3, (e.target._zoom/9));
+			console.log(`zoom=${e.target._zoom}, offset=${offset}, width=${width}`);
+			setOffset(offset);
+			setPolylineWidth(width);
+		},
+	});
+	return (
+		<></>
+	);
+}
+
+
 export const MapView = ({center = [56.838011, 60.597474], routes, segmentLib}: IMapViewProps) => {
 	const mapRef = useRef<L.Map>(null);
 	const drawControlRef = useRef<any>(null);
+	const [offsetStep, setOffsetStep] = useState(3);
+	const [polylineWidth, setPolylineWidth] = useState(3);
+	const [segmentToDraw, setSegmentToDraw] = useState<{ name: string, color: string, points: IPoint[] }[]>([]);
+
+	useEffect(() => {
+		updateRoutesWithOffsets()
+	}, [offsetStep, polylineWidth])
 
 	/**
 	 * Gets all segments for a route from the segment library
@@ -78,10 +105,7 @@ export const MapView = ({center = [56.838011, 60.597474], routes, segmentLib}: I
 		drawnLayer.remove();
 	};
 
-	/**
-	 * Renders routes with offset polylines for overlapping segments
-	 */
-	const renderRoutesWithOffsets = () => {
+	const updateRoutesWithOffsets = () => {
 		const segmentToRoutes = new Map<number, IRoute[]>();
 		routes.forEach(route => {
 			route.segments.forEach(segment => {
@@ -90,7 +114,7 @@ export const MapView = ({center = [56.838011, 60.597474], routes, segmentLib}: I
 			})
 		});
 
-		const segmentToDraw = [] as { name: string, color: string, points: IPoint[] }[];
+		const _segmentToDraw = [] as { name: string, color: string, points: IPoint[] }[];
 
 
 		for (const [segment_id, routesForSegment] of segmentToRoutes) {
@@ -99,7 +123,6 @@ export const MapView = ({center = [56.838011, 60.597474], routes, segmentLib}: I
 			if (!baseSegment) continue;
 
 			const count = routesForSegment.length;
-			const offsetStep = 3; // метров между линиями
 
 			routesForSegment.sort((a, b) => a.name.localeCompare(b.name));
 
@@ -122,7 +145,7 @@ export const MapView = ({center = [56.838011, 60.597474], routes, segmentLib}: I
 				// }
 
 
-				segmentToDraw.push({
+				_segmentToDraw.push({
 					name: route.name,
 					color: route.color,
 					points: offsetCoords,
@@ -130,16 +153,7 @@ export const MapView = ({center = [56.838011, 60.597474], routes, segmentLib}: I
 			});
 		}
 
-
-		return (
-			segmentToDraw.map((segment, index) => (
-				<Polyline
-					key={`segment-${segment.name}_${index}`}
-					positions={segment.points}
-					pathOptions={{color: segment.color, weight: 3}}
-				/>
-			))
-		)
+		setSegmentToDraw(_segmentToDraw);
 	};
 
 	/**
@@ -189,10 +203,11 @@ export const MapView = ({center = [56.838011, 60.597474], routes, segmentLib}: I
 			ref={mapRef}
 			center={center}
 			zoomControl={false}
-			zoom={13}
+			zoom={15}
 			style={{height: "100vh", width: "100%"}}
 			crs={CRS.EPSG3395}
 		>
+			<ZoomEvent setOffset={setOffsetStep} setPolylineWidth={setPolylineWidth}/>
 			<TileLayer
 				url='https://core-renderer-tiles.maps.yandex.net/tiles?l=map&x={x}&y={y}&z={z}&scale=1&lang=ru_RU'
 				subdomains={['01', '02', '03', '04']}
@@ -243,7 +258,13 @@ export const MapView = ({center = [56.838011, 60.597474], routes, segmentLib}: I
 				/>
 			</FeatureGroup>
 
-			{renderRoutesWithOffsets()}
+			{segmentToDraw.map((segment, index) => (
+				<Polyline
+					key={`segment-${segment.name}_${index}`}
+					positions={segment.points}
+					pathOptions={{color: segment.color, weight: polylineWidth}}
+				/>
+			))}
 		</MapContainer>
 	);
 };
