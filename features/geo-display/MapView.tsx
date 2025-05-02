@@ -42,7 +42,7 @@ export const MapView = ({center = [56.838011, 60.597474], routes, segmentLib}: I
 
 	useEffect(() => {
 		updateRoutesWithOffsets()
-	}, [offsetStep, polylineWidth])
+	}, [offsetStep, polylineWidth, routes])
 
 	/**
 	 * Gets all segments for a route from the segment library
