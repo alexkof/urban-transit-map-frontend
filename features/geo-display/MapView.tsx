@@ -206,6 +206,7 @@ export const MapView = ({center = [56.838011, 60.597474], routes, segmentLib}: I
 			zoom={15}
 			style={{height: "100vh", width: "100%"}}
 			crs={CRS.EPSG3395}
+            attributionControl={false}
 		>
 			<ZoomEvent setOffset={setOffsetStep} setPolylineWidth={setPolylineWidth}/>
 			<TileLayer
