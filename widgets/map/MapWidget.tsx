@@ -12,19 +12,16 @@ declare global {
         setShowRoutes: React.Dispatch<React.SetStateAction<IRoute[]>>;
     }
 }
-
-interface MapWidgetProps {
-    selectedFile: string;
-    uploadedGeoJSON?: any | null;
-}
-
 const segmentLib = getSegmentLib();
 
-export default function MapWidget(/*{selectedFile, uploadedGeoJSON}: MapWidgetProps*/) {
+export default function MapWidget() {
     const [allRoutes, setAllRoutes] = useState<IRoute[]>([]);
     const [showRoutes, setShowRoutes] = useState<IRoute[]>([]);
     const [isMenuOpen, setIsMenuOpen] = useState(true);
     const [selectedFile, setSelectedFile] = useState<string>("/routes_with_segment_refs.geo.json");
+    const [selectedTypes, setSelectedTypes] = useState<string[]>([]);
+    const [isTypeMenuOpen, setIsTypeMenuOpen] = useState(false);
+
 // eslint-disable-next-line
     const [uploadedGeoJSON, setSelectedGeoJSON] = useState<any | null>(null);
 
@@ -93,6 +90,88 @@ export default function MapWidget(/*{selectedFile, uploadedGeoJSON}: MapWidgetPr
         file: string;
     }
 
+    const toggleRoute = (route: IRoute) => {
+        setShowRoutes(prev =>
+            prev.find(r => r.name === route.name)
+                ? prev.filter(r => r.name !== route.name)
+                : [...prev, route]
+        );
+    };
+
+    const toggleType = (type: string) => {
+        setSelectedTypes(prev =>
+            prev.includes(type)
+                ? prev.filter(t => t !== type)
+                : [...prev, type]
+        );
+    };
+    const transportTypes = Array.from(
+        new Set(allRoutes.map(r => r.transport_type))
+    );
+
+
+    useEffect(() => {
+        if (selectedTypes.length === 0) {
+            // Если ни один тип не выбран — показываем все маршруты
+            setShowRoutes(allRoutes);
+        } else {
+            // Иначе — фильтруем по выбранным типам
+            setShowRoutes(
+                allRoutes.filter(r => selectedTypes.includes(r.transport_type))
+            );
+        }
+    }, [selectedTypes, allRoutes]);
+
+
+    function toRad(deg: number): number {
+        return (deg * Math.PI) / 180;
+    }
+
+// Расстояние между двумя точками [lat, lng] в километрах
+    function getDistanceHaversine(p1: IPoint, p2: IPoint): number {
+        const R = 6371; // Радиус Земли в км
+        const [lat1, lng1] = p1;
+        const [lat2, lng2] = p2;
+
+        const dLat = toRad(lat2 - lat1);
+        const dLng = toRad(lng2 - lng1);
+        const a =
+            Math.sin(dLat / 2) ** 2 +
+            Math.cos(toRad(lat1)) * Math.cos(toRad(lat2)) * Math.sin(dLng / 2) ** 2;
+        const c = 2 * Math.atan2(Math.sqrt(a), Math.sqrt(1 - a));
+
+        return R * c;
+    }
+
+// Сумма длин пар точек в одном сегменте
+    function getSegmentLength(segment: IPoint[]): number {
+        let lengthKm = 0;
+        for (let i = 1; i < segment.length; i++) {
+            lengthKm += getDistanceHaversine(
+                segment[i - 1] as IPoint,
+                segment[i] as IPoint
+            );
+        }
+        return lengthKm;
+    }
+
+
+// Основная функция
+    function calculateRouteLength(
+        route: IRoute,
+        segmentLib: ISegmentLib
+    ): number {
+        const totalKm = route.segments.reduce((sum, segRef) => {
+            const seg = segmentLib.get(segRef.segment_id);
+            if (!seg) return sum;
+            return sum + getSegmentLength(seg);
+        }, 0);
+
+        // округляем до сотых километра
+        return Math.round(totalKm * 100) / 100;
+    }
+
+
 // Список доступных geojson-файлов
     const geoJsonFiles: GeoFile[] = [
         {name: 'Scheme 1', file: '/routes_with_segment_refs.geo.json'},
@@ -102,6 +181,13 @@ export default function MapWidget(/*{selectedFile, uploadedGeoJSON}: MapWidgetPr
         {name: 'Трамваи - текущая', file: '/tram_current_with_ids.geo.json'},
         {name: 'Трамваи - инерционная', file: '/tram_inner_with_ids.geo.json'},
     ];
+
+    const transports: Record<string, string> = {
+        'troll': 'Троллейбус',
+        'bus': 'Автобус',
+        'tram': 'Трамвай',
+        'metro': 'Метро'
+    }
 
     return (
         <div className="relative">
@@ -148,22 +234,79 @@ export default function MapWidget(/*{selectedFile, uploadedGeoJSON}: MapWidgetPr
                         </label>
                     </div>
                     <div className="mb-4">
-                        <button onClick={() => setShowRoutes(allRoutes)}
-                                className="w-full bg-blue-500 text-white py-2 rounded cursor-pointer hover:shadow-md transition">Все маршруты
+                        <button onClick={() => setShowRoutes(showRoutes.length !== allRoutes.length ? allRoutes : [])}
+                                className="w-full bg-blue-500 text-white py-2 rounded cursor-pointer hover:shadow-md transition">Все
+                            маршруты
                         </button>
                     </div>
-                    <div className="space-y-3">
-                        {allRoutes.map((route, idx) => (<div
-                                key={idx}
-                                className="bg-white rounded-lg shadow p-4 cursor-pointer hover:shadow-md transition"
-                                onClick={() => setShowRoutes([route])}
-                            >
-                                <h4 className="font-semibold mb-1">Маршрут {route.name}</h4>
-                                <p className="text-sm">Интервал: - мин</p>
-                                <p className="text-sm">Длина: - км</p>
+
+                    {/* Дропдаун-фильтр */}
+                    <div className="relative w-full">
+                        <button
+                            onClick={() => setIsTypeMenuOpen(prev => !prev)}
+                            className="w-full bg-white font-semibold px-2 py-2 mb-4 rounded focus:outline-none flex justify-between items-center"
+                        >
+                            {selectedTypes.length > 0
+                                ? selectedTypes.map(t => transports[t] || t).join(', ')
+                                : 'Фильтр по виду транспорта'}
+                            <span className="ml-2 transform transition-transform"
+                                  style={{transform: isTypeMenuOpen ? 'rotate(180deg)' : undefined}}>▼</span>
+                        </button>
+
+                        {isTypeMenuOpen && (
+                            <div
+                                className="absolute left-0 right-0 mt-1 bg-white border rounded shadow max-h-60 overflow-auto z-50">
+                                {transportTypes.map(type => (
+                                    <label
+                                        key={type}
+                                        className="flex items-center px-2 py-1 hover:bg-gray-100 cursor-pointer"
+                                    >
+                                        <input
+                                            type="checkbox"
+                                            checked={selectedTypes.includes(type)}
+                                            onChange={() => toggleType(type)}
+                                            className="form-checkbox h-4 w-4"
+                                        />
+                                        <span className="ml-2">{transports[type] || type}</span>
+                                    </label>
+                                ))}
                             </div>
-                        ))}
+                        )}
                     </div>
+
+                    <div className="space-y-3">
+                        {allRoutes.map(route => {
+                            const isChecked = showRoutes.some(r => r.name === route.name);
+                            return (
+                                <label
+                                    key={route.transport_type + route.name}
+                                    className={`
+                                    flex flex-col bg-white rounded-lg shadow p-4 cursor-pointer
+                                    hover:shadow-md transition border-t-8
+                                    ${isChecked ? 'opacity-100' : 'opacity-50'}
+                                    `}
+                                    style={{borderTopColor: route.color}}
+                                >
+                                    <div className="flex items-center mb-2">
+                                        <input
+                                            type="checkbox"
+                                            checked={isChecked}
+                                            onChange={() => toggleRoute(route)}
+                                            className="form-checkbox h-5 w-5 mr-2"
+                                        />
+                                        <h4 className="font-semibold">{(transports[route.transport_type] || 'Маршрут') + ' ' + route.name}</h4>
+                                    </div>
+
+                                    <>
+                                        <p className="text-sm">Интервал: {route.interval || '-'} мин</p>
+                                        <p className="text-sm">Длина: {calculateRouteLength(route, segmentLib).toFixed(2) || '-'} км</p>
+                                    </>
+                                </label>
+                            );
+                        })}
+                    </div>
+
+
                     {isMenuOpen && (
                         <button
                             className="fixed bottom-4 left-1/4 ml-2 bg-white px-3 py-2 rounded shadow hover:bg-gray-50 z-1000"
@@ -175,25 +318,7 @@ export default function MapWidget(/*{selectedFile, uploadedGeoJSON}: MapWidgetPr
 
                 </div>
             )}
-            {/*<div className="absolute top-2.5 right-2.5 size bg-white p-1.5 border border-black z-[1000] overflow-scroll w-1/6 h-fit max-h-full">*/}
-            {/*    <h3 className="text-lg font-semibold">Маршруты</h3>*/}
-            {/*    <button*/}
-            {/*        className="block my-1.25 w-full text-left"*/}
-            {/*        onClick={() => setShowRoutes(allRoutes)}*/}
-            {/*    >*/}
-            {/*        Все маршруты*/}
-            {/*    </button>*/}
-            {/*    {allRoutes.map((route, index) => (*/}
-            {/*        <button*/}
-            {/*            key={index}*/}
-            {/*            className="block my-1.25 w-full text-left"*/}
-            {/*            onClick={() => setShowRoutes([route])}*/}
-            {/*        >*/}
-            {/*            Маршрут {route.name}*/}
-            {/*        </button>*/}
-            {/*    ))}*/}
 
-            {/*</div>*/}
             <MapView center={ekb} routes={showRoutes} segmentLib={segmentLib}/>
         </div>
     );

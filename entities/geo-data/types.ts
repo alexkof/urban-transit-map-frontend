@@ -2,6 +2,8 @@ interface IRoute {
 	name: string;
 	segments: IRouteSegmentRef[];
 	color: string;
+	transport_type: string;
+	interval: number;
 }
 
 interface IRouteSegmentRef {
