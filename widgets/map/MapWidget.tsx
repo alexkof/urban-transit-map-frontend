@@ -321,31 +321,27 @@ export default function MapWidget() {
                                         </div>
                                     </div>
 
-                                    {/* Group Content */}
+                                    {/* Group Content - Grid of Route Badges */}
                                     {isExpanded && (
-                                        <div className="p-1 space-y-1">
+                                        <div className="p-2 flex flex-wrap gap-1">
                                             {routesInGroup.map(route => {
                                                 const isChecked = selectedRoutes.some(r => r.name === route.name);
+                                                const routeLength = calculateRouteLength(route, segmentLib).toFixed(2);
+                                                const interval = route.interval || '-';
+
                                                 return (
-                                                    <label
+                                                    <button
                                                         key={route.transport_type + route.name}
-                                                        className={`
-                                                        flex items-center bg-gray-50 rounded px-2 py-1.5 cursor-pointer
-                                                        hover:bg-gray-100 transition border-l-4
-                                                        ${isChecked ? 'opacity-100' : 'opacity-50'}
-                                                        `}
-                                                        style={{borderLeftColor: route.color}}
+                                                        onClick={() => toggleRoute(route)}
+                                                        className="rounded px-2 py-1 text-sm font-bold cursor-pointer hover:opacity-80 transition min-w-[40px] text-center"
+                                                        style={{
+                                                            backgroundColor: isChecked ? route.color : '#d1d5db',
+                                                            color: isChecked ? '#fff' : '#6b7280'
+                                                        }}
+                                                        title={`${route.name}: ${routeLength} км, интервал: ${interval} мин`}
                                                     >
-                                                        <input
-                                                            type="checkbox"
-                                                            checked={isChecked}
-                                                            onChange={() => toggleRoute(route)}
-                                                            className="form-checkbox h-4 w-4 mr-2 flex-shrink-0"
-                                                        />
-                                                        <span className="text-sm">
-                                                            <span className="font-bold">{route.name}</span> ({calculateRouteLength(route, segmentLib).toFixed(2) || '-'} км, {route.interval || '-'} мин)
-                                                        </span>
-                                                    </label>
+                                                        {route.name}
+                                                    </button>
                                                 );
                                             })}
                                         </div>
