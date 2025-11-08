@@ -1,1 +1,29 @@
 @import "tailwindcss";
+
+/* Subtle checkbox styling */
+input[type="checkbox"] {
+  appearance: none;
+  -webkit-appearance: none;
+  width: 16px;
+  height: 16px;
+  border: 1px solid #666;
+  border-radius: 2px;
+  background-color: white;
+  cursor: pointer;
+  position: relative;
+}
+
+input[type="checkbox"]:checked {
+  background-color: white;
+  border-color: #333;
+}
+
+input[type="checkbox"]:checked::after {
+  content: "✓";
+  position: absolute;
+  top: -2px;
+  left: 2px;
+  font-size: 14px;
+  color: #000;
+  font-weight: bold;
+}
