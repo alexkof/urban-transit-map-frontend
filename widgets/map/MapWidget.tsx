@@ -35,9 +35,10 @@ export default function MapWidget() {
             }
             setAllRoutes(geo);
             setSelectedRoutes(geo);
-            // Initialize all groups as visible
+            // Initialize all groups as visible and expanded
             const types = new Set<string>(geo.map((r: IRoute) => r.transport_type));
             setVisibleGroups(types);
+            setExpandedGroups(types);
             // setConflicts(_conflicts);
         };
         f();
@@ -53,6 +54,7 @@ export default function MapWidget() {
             setSelectedRoutes(geoJSON);
             const types = new Set<string>(geoJSON.map((r: IRoute) => r.transport_type));
             setVisibleGroups(types);
+            setExpandedGroups(types);
             //setConflicts(_conflicts);
         }
         f()
